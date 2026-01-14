@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id             Int         @id @default(autoincrement())
+  name           String
+  description    String
+  price          Float
+  stock          Int
+  imageUrl       String
+  imageUrlFirst  String?
+  imageUrlSecond String?
+  categoryId     Int
+  category       Category    @relation(fields: [categoryId], references: [id])
+  brandId        Int
+  brand          Brand       @relation(fields: [brandId], references: [id])
+  orderItems     OrderItem[]
+  cardItems      CardItem[]
+}
+
+model Category {
+  id                    Int       @id @default(autoincrement())
+  name                  String
+  categoryImage         String
+  categoryDescription   String
+  categoryCarouselImage String
+  categoryInfo          String
+  products              Product[]
+}
+
+model Brand {
+  id       Int       @id @default(autoincrement())
+  name     String
+  image    String?
+  products Product[]
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  picture   String?
+  name      String
+  email     String    @unique
+  password  String
+  phone     String    @unique
+  country   String?
+  createdAt DateTime  @default(now())
+  orders    Order[]
+  addresses Address[]
+  cards     Card[]
+}
+
+model Address {
+  id             Int     @id @default(autoincrement())
+  country        String
+  province       String?
+  city           String?
+  postalCode     String?
+  isDefault      Boolean @default(false)
+  completeAdress String
+  userId         Int
+  user           User    @relation(fields: [userId], references: [id])
+  orders         Order[]
+}
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  userId          Int
+  addressId       Int
+  createdAt       DateTime    @default(now())
+
+  productTotal    Float       @default(0)
+  protectionTotal Float       @default(0)
+  shippingCost    Float       @default(0)
+  serviceFee      Float       @default(0)
+  totalAmount     Float       @default(0)
+
+  stockUpdated    Boolean     @default(false)
+
+  user            User        @relation(fields: [userId], references: [id])
+  address         Address     @relation(fields: [addressId], references: [id])
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id            Int     @id @default(autoincrement())
+  orderId       Int
+  productId     Int
+  quantity      Int
+  price         Float
+  protectionFee Float    @default(0)
+
+  order         Order   @relation(fields: [orderId], references: [id])
+  product       Product @relation(fields: [productId], references: [id])
+}
+
+model Card {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id])
+  cardItems CardItem[]
+}
+
+model CardItem {
+  id        Int     @id @default(autoincrement())
+  cardId    Int
+  productId Int
+  quantity  Int
+  price     Float
+  card      Card    @relation(fields: [cardId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}

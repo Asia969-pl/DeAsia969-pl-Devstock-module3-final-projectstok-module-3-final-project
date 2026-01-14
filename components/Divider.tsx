@@ -1,0 +1,10 @@
+export default function Divider() {
+  return (
+    <div
+      className="
+          h-px
+          bg-orange-500 dark:bg-[#383B42]
+        "
+    ></div>
+  );
+}
