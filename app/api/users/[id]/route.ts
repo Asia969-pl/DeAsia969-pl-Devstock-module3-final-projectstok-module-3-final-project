@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/library/prisma";
+import bcrypt from "bcryptjs";
 
 // GET /api/users/[id]
 export async function GET(req: NextRequest) {
@@ -15,7 +16,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Pobranie użytkownika z pełnymi relacjami
     const user = await prisma.user.findUnique({
       where: { id },
       include: {
@@ -23,9 +23,7 @@ export async function GET(req: NextRequest) {
         orders: {
           include: {
             address: true,
-            items: {
-              include: { product: true },
-            },
+            items: { include: { product: true } },
           },
           orderBy: { createdAt: "desc" },
         },
@@ -44,7 +42,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Sortowanie cardItems w każdej karcie (opcjonalne)
     user.cards.forEach((card) => {
       card.cardItems.sort((a, b) => b.id - a.id);
     });
@@ -59,7 +56,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST: tworzenie nowego użytkownika
+// POST /api/users — REGISTER
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -72,8 +69,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Sprawdzenie unikalności email i phone
-    const existingUserByEmail = await prisma.user.findUnique({ where: { email } });
+    const existingUserByEmail = await prisma.user.findUnique({
+      where: { email },
+    });
     if (existingUserByEmail) {
       return NextResponse.json(
         { message: "Użytkownik o tym emailu już istnieje" },
@@ -82,7 +80,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (phone) {
-      const existingUserByPhone = await prisma.user.findUnique({ where: { phone } });
+      const existingUserByPhone = await prisma.user.findUnique({
+        where: { phone },
+      });
       if (existingUserByPhone) {
         return NextResponse.json(
           { message: "Użytkownik o tym numerze telefonu już istnieje" },
@@ -91,19 +91,31 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ✅ HASH HASŁA
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await prisma.user.create({
       data: {
         name,
         email,
-        password,
+        password: hashedPassword, // 🔐 HASH
         phone,
         country,
         picture: "https://i.ibb.co/PvWrtkmt/avatar.png",
       },
       include: {
         addresses: true,
-        orders: { include: { items: { include: { product: true } }, address: true } },
-        cards: { include: { cardItems: { include: { product: true } } } },
+        orders: {
+          include: {
+            items: { include: { product: true } },
+            address: true,
+          },
+        },
+        cards: {
+          include: {
+            cardItems: { include: { product: true } },
+          },
+        },
       },
     });
 
