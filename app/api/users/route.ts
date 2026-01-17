@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/library/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs"; // ✅ ZMIANA
 
 /* =========================
    POST — REGISTER USER
