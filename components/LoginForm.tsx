@@ -13,15 +13,20 @@ import Link from "next/link";
 import Cookies from "js-cookie";
 import { useUser } from "../components/context/UserContext";
 
+/* ================= SCHEMAS ================= */
+
 const loginIdentifierSchema = z.object({
   emailOrPhone: z
     .string()
     .min(3, "required")
-    .refine((value) => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const phoneRegex = /^[0-9]{9,15}$/;
-      return emailRegex.test(value) || phoneRegex.test(value);
-    }, { message: "invalid phone number lub email" }),
+    .refine(
+      (value) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^[0-9]{9,15}$/;
+        return emailRegex.test(value) || phoneRegex.test(value);
+      },
+      { message: "invalid phone number lub email" }
+    ),
 });
 
 const loginPasswordSchema = z.object({
@@ -40,30 +45,48 @@ export default function LoginForm() {
   const router = useRouter();
   const { setUser } = useUser();
 
+  /* ================= FORMS ================= */
+
   const {
     register: registerStep1,
     handleSubmit: handleSubmitStep1,
     formState: { errors: errorsStep1 },
-  } = useForm<StepOneData>({ resolver: zodResolver(loginIdentifierSchema) });
+  } = useForm<StepOneData>({
+    resolver: zodResolver(loginIdentifierSchema),
+  });
 
   const {
     register: registerStep2,
     handleSubmit: handleSubmitStep2,
     formState: { errors: errorsStep2 },
-  } = useForm<StepTwoData>({ resolver: zodResolver(loginPasswordSchema) });
+  } = useForm<StepTwoData>({
+    resolver: zodResolver(loginPasswordSchema),
+  });
 
   const inputClass = (hasError: boolean) =>
     `border ${hasError ? "border-[#F87171]" : "border-[#383B42]"} rounded-[6px] px-[14px] py-[16px] w-full`;
 
+  /* ================= HANDLERS ================= */
+
   const onSubmitStep1 = (data: StepOneData) => {
+    console.log("🟢 STEP 1 SUBMIT", data);
     setIdentifier(data.emailOrPhone);
     setStep(2);
   };
 
   const onSubmitStep2 = async (data: StepTwoData) => {
-    if (!identifier) return;
+    console.log("🟢 STEP 2 SUBMIT");
+    console.log("identifier:", identifier);
+    console.log("password:", data.password);
+
+    if (!identifier) {
+      console.warn("⛔ identifier is missing");
+      return;
+    }
 
     setLoginError(null);
+
+    console.log("🟡 calling signIn(credentials)");
 
     const result = await signIn("credentials", {
       redirect: false,
@@ -71,20 +94,30 @@ export default function LoginForm() {
       password: data.password,
     });
 
+    console.log("🟡 signIn result:", result);
+
     if (result?.error) {
-      setLoginError("Wrong password or login");
-    } else {
-      const res = await fetch("/api/auth/session");
-      const sessionData = await res.json();
-
-      if (sessionData?.user) {
-        Cookies.set("user", JSON.stringify(sessionData.user));
-        setUser(sessionData.user);
-      }
-
-      router.push("/");
+      console.error("🔴 LOGIN ERROR:", result.error);
+      setLoginError("Wrong Password or Login");
+      return;
     }
+
+    console.log("🟢 LOGIN OK – fetching session");
+
+    const res = await fetch("/api/auth/session");
+    const sessionData = await res.json();
+
+    console.log("🟢 session data:", sessionData);
+
+    if (sessionData?.user) {
+      Cookies.set("user", JSON.stringify(sessionData.user));
+      setUser(sessionData.user);
+    }
+
+    router.push("/");
   };
+
+  /* ================= UI ================= */
 
   return (
     <div className="flex flex-col items-center justify-center bg-gray-50 dark:bg-black pt-30 pb-30 gap-8">
@@ -93,17 +126,26 @@ export default function LoginForm() {
       <div className="w-full max-w-[480px] px-4 gap-6">
         {step === 1 && (
           <form
+            className="bg-gray-200 dark:text-[#FcFCFC] dark:bg-[#262626] p-6 space-y-4 gap-8 border border-[#383B42] rounded-[6px]"
             onSubmit={handleSubmitStep1(onSubmitStep1)}
-            className="bg-gray-200 dark:bg-[#262626] p-6 space-y-4 border rounded-[6px]"
           >
             <h1 className="text-[24px] font-medium">Sign In</h1>
             <SecondDivider />
 
-            <input
-              {...registerStep1("emailOrPhone")}
-              placeholder="Email or phone"
-              className={inputClass(!!errorsStep1.emailOrPhone)}
-            />
+            <div className="flex flex-col gap-4 pt-8">
+              <label className="font-medium">Email or mobile phone number</label>
+              <input
+                {...registerStep1("emailOrPhone")}
+                placeholder="Email or Mobile phone number"
+                className={inputClass(!!errorsStep1.emailOrPhone)}
+              />
+
+              {errorsStep1.emailOrPhone && (
+                <p className="text-red-500 text-[14px]">
+                  {errorsStep1.emailOrPhone.message}
+                </p>
+              )}
+            </div>
 
             <button
               type="submit"
@@ -112,29 +154,52 @@ export default function LoginForm() {
               Continue
             </button>
 
-            <p className="text-sm">
-              Don't have account?{" "}
-              <Link href="/register"><b>Register</b></Link>
+            <p className="pt-3 text-black dark:text-[#FCFCFC] text-[14px]">
+              Don't have account{" "}
+              <Link href="/register">
+                <span className="font-semibold">Register</span>
+              </Link>
             </p>
           </form>
         )}
 
         {step === 2 && identifier && (
           <form
+            className="bg-gray-200 dark:text-[#FcFCFC] dark:bg-[#262626] p-6 space-y-4 gap-8 border border-[#383B42] rounded-[6px]"
             onSubmit={handleSubmitStep2(onSubmitStep2)}
-            className="bg-gray-200 dark:bg-[#262626] p-6 space-y-4 border rounded-[6px]"
           >
             <h1 className="text-[24px] font-medium">Enter Password</h1>
             <SecondDivider />
 
-            <input
-              {...registerStep2("password")}
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              className={inputClass(!!errorsStep2.password || !!loginError)}
-            />
+            <div className="flex flex-col gap-4 pt-8 relative">
+              <label className="font-medium">Password</label>
+              <input
+                {...registerStep2("password")}
+                placeholder="Password"
+                type={showPassword ? "text" : "password"}
+                className={inputClass(
+                  !!errorsStep2.password || !!loginError
+                )}
+              />
 
-            {loginError && <p className="text-red-500">{loginError}</p>}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-23"
+              >
+                <EyeIcon />
+              </button>
+
+              {errorsStep2.password && (
+                <p className="text-red-500 text-[14px]">
+                  {errorsStep2.password.message}
+                </p>
+              )}
+
+              {loginError && (
+                <p className="text-red-500 text-[14px]">{loginError}</p>
+              )}
+            </div>
 
             <button
               type="submit"
