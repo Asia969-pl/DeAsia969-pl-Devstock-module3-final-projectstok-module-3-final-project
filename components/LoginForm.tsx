@@ -78,7 +78,7 @@ export default function LoginForm() {
     console.log("🟢 STEP 2 SUBMIT");
     console.log("identifier:", identifier);
     console.log("password:", data.password);
-
+    console.log("🔥 FORCE DEPLOY " + Date.now());
     if (!identifier) {
       console.warn("⛔ identifier is missing");
       return;
