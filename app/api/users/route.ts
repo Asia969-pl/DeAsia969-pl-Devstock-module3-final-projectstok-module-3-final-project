@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/library/prisma";
+import bcrypt from "bcrypt";
 
 /* =========================
    POST — REGISTER USER
@@ -17,6 +18,7 @@ export async function POST(req: Request) {
       );
     }
 
+    // 🔍 sprawdzenie czy user już istnieje
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -28,14 +30,17 @@ export async function POST(req: Request) {
       );
     }
 
+    // 🔐 HASH HASŁA
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
       data: {
         name,
         email,
-        password,
+        password: hashedPassword, // ✅ zapisujemy HASH
         phone,
         country,
-        picture: "https://i.ibb.co/PvWrtkmt/avatar.png"
+        picture: "https://i.ibb.co/PvWrtkmt/avatar.png",
       },
       select: {
         id: true,
