@@ -18,6 +18,7 @@ export interface CartItem {
 
 interface Filters {
   categories: string[];
+  brands: string[];
   price: { min: string; max: string };
 }
 
@@ -79,7 +80,7 @@ interface GlobalContextType {
   toggleProtectionFee: (cardItemId: number) => void;
   shippingCost: number;
   serviceFee: number;
-
+  shippingInsurance: number
   // --- ORDER ---
   handlePayNow: () => Promise<void>;
 }
@@ -99,12 +100,13 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
 
   /* ---------- GLOBAL DATA ---------- */
   const [categories, setCategories] = useState<any[]>([]);
+
   const [products, setProducts] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [recomended, setRecomended] = useState<any[]>([]);
   const [productsByCategory, setProductsByCategory] = useState<any[]>([]);
   const [productById, setProductById] = useState<any | null>(null);
-  const [filters, setFilters] = useState<Filters>({ categories: [], price: { min: "", max: "" } });
+  const [filters, setFilters] = useState<Filters>({ categories: [],   brands: [],  price: { min: "", max: "" } });
 
   /* ---------- CART ---------- */
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -117,6 +119,8 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
 
   const shippingCost = 5;
   const serviceFee = 0.5;
+  const shippingInsurance = 6
+
 
   /* ================= HELPERS ================= */
 
@@ -163,12 +167,17 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
     page?: number,
     sort?: string,
     categoriesForFetch?: string[],
-    priceForFetch?: { min: string; max: string }
+    priceForFetch?: { min: string; max: string },
+    brandsForFetch?: string[]    
   ) => {
     const params = new URLSearchParams();
     const cats = categoriesForFetch ?? filters.categories;
+    const brands = brandsForFetch ?? filters.brands;
     const price = priceForFetch ?? filters.price;
+
     cats.forEach(c => params.append("category", c));
+    brands.forEach(b => params.append("brand", b)); // 👈
+
     if (price.min) params.append("min", price.min);
     if (price.max) params.append("max", price.max);
     if (limit) params.append("limit", String(limit));
@@ -283,6 +292,7 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
 
   const handlePayNow = async () => {
     try {
+      console.log("🔥 handlePayNow CLICKED");
       // 1️⃣ Walidacja
       if (!userId) {
         console.warn("Brak userId (użytkownik niezalogowany)");
@@ -313,6 +323,7 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
         items,
         shippingCost,
         serviceFee,
+        insuranceFee: shippingInsurance
       };
   
       console.log("Tworzę zamówienie z danymi:", { userId, body });
@@ -374,7 +385,7 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
       fetchProductsByCategory, getProductById,
       cart, addToCart, removeFromCart, clearCart, updateQuantity,
       selectedCartIds, toggleSelectCartItem, selectedCartItems,
-      protectionFeeIds, toggleProtectionFee, shippingCost, serviceFee,
+      protectionFeeIds, toggleProtectionFee, shippingCost, serviceFee, shippingInsurance,
       addresses, setAddresses, selectedAddressId, setSelectedAddressId,
       handlePayNow
     }}>

@@ -6,6 +6,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     const categories = searchParams.getAll("category");
+    const brands = searchParams.getAll("brand"); // 👈
     const min = searchParams.get("min");
     const max = searchParams.get("max");
     const limitParam = searchParams.get("limit");
@@ -28,6 +29,17 @@ export async function GET(request: Request) {
         },
       },
     };
+
+    if (brands.length) {
+      where.brand = {
+        name: {
+          in: brands,
+          mode: "insensitive",
+        },
+      };
+    }
+
+
 
     if (min || max) {
       where.price = {};

@@ -3,10 +3,25 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import RightOrangeArrowIcon from "./RightOrangeArrowIcon";
+import { useRouter } from "next/navigation";
+import { useContext } from "react";
+import { GlobalContext } from "./context/GlobalContext";
+
+
+
 
 export default function BrandContainer({ brands }) {
   const [translateX, setTranslateX] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
+  const router = useRouter();
+  const context = useContext(GlobalContext);
+
+  if (!context) return null;
+
+  const { setFilters } = context;
+
+
+
   const containerRef = useRef(null);
 
   const maxCardWidth = 220;
@@ -29,6 +44,19 @@ export default function BrandContainer({ brands }) {
     }
   };
 
+  const handleBrandClick = (brandName: string) => {
+    setFilters(prev => ({
+      ...prev,
+      categories: [],       // reset kategorii (opcjonalnie)
+      brands: [brandName],  // 👈 ustaw brand
+    }));
+
+    router.push("/product");
+  };
+
+
+
+
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -43,6 +71,12 @@ export default function BrandContainer({ brands }) {
     return () => observer.disconnect();
   }, []);
 
+
+
+
+
+
+  
   return (
     <div className="w-full px-4 md:px-10">
       {/* Nagłówek */}
@@ -71,6 +105,7 @@ export default function BrandContainer({ brands }) {
           {safeBrands.map((brand) => (
             <div
               key={brand.id}
+              onClick={() => handleBrandClick(brand.name)}
               className="shrink-0 w-[220px] h-[190px] bg-gray-200 dark:bg-[#262626] flex flex-col items-center justify-center gap-7 p-4 rounded-lg border border-[#616674]"
             >
               <div className="w-[60px] h-[30px] flex items-center justify-center">

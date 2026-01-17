@@ -1,28 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/library/prisma";
 
-// Funkcja wyciągająca userId z URL
+/* =========================
+   HELPERS
+========================= */
 function getUserIdFromUrl(req: NextRequest): number | null {
-  const url = new URL(req.url);
-  const parts = url.pathname.split("/").filter(Boolean);
-  const idPart = parts.pop();
-  const userId = Number(idPart);
-  return isNaN(userId) ? null : userId;
+  try {
+    const url = new URL(req.url);
+    const parts = url.pathname.split("/").filter(Boolean);
+    const idPart = parts.pop();
+    const userId = Number(idPart);
+    return Number.isInteger(userId) ? userId : null;
+  } catch {
+    return null;
+  }
 }
 
-// GET /api/orders/[userId]
+/* =========================
+   GET /api/orders/[userId]
+========================= */
 export async function GET(req: NextRequest) {
   try {
     const userId = getUserIdFromUrl(req);
 
-    if (!userId) {
-      return NextResponse.json({ message: "Invalid userId" }, { status: 400 });
+    if (userId === null) {
+      return NextResponse.json(
+        { message: "Invalid userId" },
+        { status: 400 }
+      );
     }
 
     const orders = await prisma.order.findMany({
       where: { userId },
       include: {
-        items: { include: { product: true } },
+        items: {
+          include: { product: true },
+        },
         address: true,
       },
       orderBy: { createdAt: "desc" },
@@ -38,13 +51,18 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/orders/[userId]
+/* =========================
+   POST /api/orders/[userId]
+========================= */
 export async function POST(req: NextRequest) {
   try {
     const userId = getUserIdFromUrl(req);
 
-    if (!userId) {
-      return NextResponse.json({ message: "Invalid userId" }, { status: 400 });
+    if (userId === null) {
+      return NextResponse.json(
+        { message: "Invalid userId" },
+        { status: 400 }
+      );
     }
 
     const body = await req.json();
@@ -54,7 +72,10 @@ export async function POST(req: NextRequest) {
       items,
       shippingCost,
       serviceFee,
+      insuranceFee,
     } = body;
+
+    /* ===== VALIDATION ===== */
 
     if (!addressId || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -63,12 +84,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Walidacja items
     for (const item of items) {
       if (
         typeof item.productId !== "number" ||
         typeof item.quantity !== "number" ||
-        typeof item.price !== "number"
+        typeof item.price !== "number" ||
+        item.quantity <= 0 ||
+        item.price < 0
       ) {
         return NextResponse.json(
           { message: "Invalid item structure" },
@@ -77,42 +99,72 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    /* ===== CALCULATIONS ===== */
+
     const productTotal = items.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
 
     const protectionTotal = items.reduce(
-      (sum, item) => sum + (item.protectionFee || 0),
+      (sum, item) =>
+        sum +
+        (typeof item.protectionFee === "number" ? item.protectionFee : 0),
       0
     );
 
-    const shipping = typeof shippingCost === "number" ? shippingCost : 0;
-    const service = typeof serviceFee === "number" ? serviceFee : 0;
+    const shipping =
+      typeof shippingCost === "number" && shippingCost >= 0
+        ? shippingCost
+        : 0;
+
+    const service =
+      typeof serviceFee === "number" && serviceFee >= 0
+        ? serviceFee
+        : 0;
+
+    const insurance =
+      typeof insuranceFee === "number" && insuranceFee >= 0
+        ? insuranceFee
+        : 0;
 
     const totalAmount =
-      productTotal + protectionTotal + shipping + service;
+      productTotal +
+      protectionTotal +
+      insurance +
+      shipping +
+      service;
+
+    /* ===== CREATE ORDER ===== */
 
     const newOrder = await prisma.order.create({
       data: {
         userId,
         addressId,
+
         productTotal,
         protectionTotal,
+        insuranceFee: insurance, // ✅ zapis do DB
         shippingCost: shipping,
         serviceFee: service,
         totalAmount,
+
         items: {
           create: items.map((item: any) => ({
             productId: item.productId,
             quantity: item.quantity,
             price: item.price,
-            protectionFee: item.protectionFee || 0,
+            protectionFee:
+              typeof item.protectionFee === "number"
+                ? item.protectionFee
+                : 0,
           })),
         },
       },
       include: {
-        items: { include: { product: true } },
+        items: {
+          include: { product: true },
+        },
         address: true,
       },
     });

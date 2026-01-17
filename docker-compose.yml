@@ -1,17 +1,8 @@
-services:
-  web:
-    build: .
-    container_name: my-app-web
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    depends_on:
-      - db
+version: "3.9"
 
+services:
   db:
     image: postgres:16
-    container_name: my-app-db
     restart: always
     environment:
       POSTGRES_USER: prisma
@@ -20,7 +11,20 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "5432:5432"
+
+  web:
+    build: .
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - /app/node_modules
 
 volumes:
   db_data:

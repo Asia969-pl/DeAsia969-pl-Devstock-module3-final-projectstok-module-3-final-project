@@ -27,6 +27,7 @@ export default function CheckoutPage() {
     selectedAddressId,
     setSelectedAddressId,
     handlePayNow,
+    shippingInsurance
   } = ctx;
 
   const insuranceFee = 5;
@@ -51,7 +52,7 @@ export default function CheckoutPage() {
     0
   );
 
-  const total = productsTotal + protectionTotal + shippingCost + serviceFee;
+  const total = productsTotal + protectionTotal + shippingCost + serviceFee + shippingInsurance;
 
   const handleAddAddress = async (data: any) => {
     try {
@@ -180,8 +181,9 @@ export default function CheckoutPage() {
             </div>
 
             <div className="flex justify-between mt-4 text-[16px] font-medium text-black dark:text-[#E7E7E7]">
-              <span className="mb-4">Total Shipping Price</span>
-              <span className="text-[18px]">${shippingCost.toFixed(2)}</span>
+              <span className="mb-4"> Shipping insurance</span>
+              <span className="text-[18px]">${shippingInsurance.toFixed(2)}</span>
+
             </div>
             <div className="h-[1px] w-full bg-black dark:bg-[#383B42]"></div>
             <div className="mt-4">
@@ -200,7 +202,11 @@ export default function CheckoutPage() {
             </div>
 
             <button
-              onClick={handlePayNow}
+  type="button"
+              onClick={() => {
+    console.log("🟢 PAY NOW CLICKED");
+    handlePayNow();
+  }}
               disabled={!selectedAddressId}
               className="w-full mt-4 py-[14px] rounded-[6px] bg-[#F29145] hover:bg-orange-600 text-black font-medium"
             >

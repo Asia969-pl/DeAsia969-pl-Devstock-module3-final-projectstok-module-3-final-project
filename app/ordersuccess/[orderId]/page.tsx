@@ -62,7 +62,10 @@ export default function OrderSuccessPage() {
 
   const shippingCost = order?.shippingCost ?? 0;
   const serviceFee = order?.serviceFee ?? 0;
-  const grandTotal = productTotal + protectionTotal + shippingCost + serviceFee;
+  const insuranceFee = order?.insuranceFee ?? 0
+
+
+  const grandTotal = productTotal + protectionTotal + shippingCost + serviceFee + insuranceFee;
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString("en-US", {
@@ -149,6 +152,7 @@ export default function OrderSuccessPage() {
             <div className="flex justify-between"><span>Total Product Price</span><span>${productTotal.toFixed(2)}</span></div>
             <div className="flex justify-between"><span>Total Product Protection</span><span>${protectionTotal.toFixed(2)}</span></div>
             <div className="flex justify-between"><span>Total Shipping Price</span><span>${shippingCost.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span>Shipping Insurance</span><span>${insuranceFee.toFixed(2)}</span></div>
             <div className="flex justify-between"><span>Service Fees</span><span>${serviceFee.toFixed(2)}</span></div>
             <div className="h-px w-full bg-gray-200 dark:bg-[#383B42]" />
             <div className="flex justify-between font-medium text-[18px] sm:text-[20px]">

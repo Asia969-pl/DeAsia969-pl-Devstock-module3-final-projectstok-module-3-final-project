@@ -37,7 +37,8 @@ export default function ProductList() {
         page,
         sort,
         categoriesForFetch,
-        filters.price
+        filters.price,
+        filters.brands
       );
 
       setTotalPages(meta?.totalPages ?? 10);
@@ -53,6 +54,7 @@ export default function ProductList() {
     filters.price,
     allCategories,
     fetchProductsByCategory,
+    filters.brands
   ]);
 
   const hasProducts =
