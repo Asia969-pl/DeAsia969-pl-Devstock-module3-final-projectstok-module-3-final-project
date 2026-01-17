@@ -1,11 +1,9 @@
-// app/api/auth/[...nextauth]/route.ts
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/library/prisma";
 import bcrypt from "bcrypt";
 
-/* ================= TYPES ================= */
-
+// 🔹 Typ użytkownika
 interface User {
   id: number;
   email: string;
@@ -14,21 +12,14 @@ interface User {
   picture?: string | null;
 }
 
-/* ================= NEXT-AUTH TYPES ================= */
-
 declare module "next-auth" {
   interface Session {
     user: User;
   }
-}
-
-declare module "next-auth/jwt" {
   interface JWT {
     user?: User;
   }
 }
-
-/* ================= AUTH OPTIONS ================= */
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -44,7 +35,7 @@ export const authOptions: AuthOptions = {
           return null;
         }
 
-        // 1️⃣ SZUKAMY USERA (BEZ HASŁA W WHERE)
+        // ✅ 1. Szukamy usera TYLKO po email / phone
         const user = await prisma.user.findFirst({
           where: {
             OR: [
@@ -54,27 +45,23 @@ export const authOptions: AuthOptions = {
           },
         });
 
-        if (!user || !user.password) {
-          return null;
-        }
+        if (!user || !user.password) return null;
 
-        // 2️⃣ PORÓWNANIE HASŁA (bcrypt)
+        // ✅ 2. PORÓWNANIE HASHA
         const isValid = await bcrypt.compare(
           credentials.password,
           user.password
         );
 
-        if (!isValid) {
-          return null;
-        }
+        if (!isValid) return null;
 
-        // 3️⃣ ZWRACAMY DANE DO SESJI
+        // ✅ 3. Zwracamy usera do sesji
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           phone: user.phone,
-          picture: user.picture ?? null,
+          picture: user.picture,
         };
       },
     }),
@@ -90,16 +77,11 @@ export const authOptions: AuthOptions = {
 
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.user = user;
-      }
+      if (user) token.user = user;
       return token;
     },
-
     async session({ session, token }) {
-      if (token.user) {
-        session.user = token.user;
-      }
+      if (token.user) session.user = token.user;
       return session;
     },
   },
