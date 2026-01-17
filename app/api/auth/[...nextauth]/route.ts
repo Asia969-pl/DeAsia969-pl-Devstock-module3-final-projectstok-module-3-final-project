@@ -1,9 +1,12 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/library/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
-// 🔹 Typ użytkownika
+/* =========================
+   TYPES
+========================= */
+
 interface User {
   id: number;
   email: string;
@@ -12,14 +15,25 @@ interface User {
   picture?: string | null;
 }
 
+/* =========================
+   NEXTAUTH TYPE AUGMENTATION
+========================= */
+
 declare module "next-auth" {
   interface Session {
     user: User;
   }
+}
+
+declare module "next-auth/jwt" {
   interface JWT {
     user?: User;
   }
 }
+
+/* =========================
+   AUTH OPTIONS
+========================= */
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -30,12 +44,12 @@ export const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" },
       },
 
-      async authorize(credentials): Promise<User | null> {
+      async authorize(credentials) {
         if (!credentials?.identifier || !credentials.password) {
           return null;
         }
 
-        // ✅ 1. Szukamy usera TYLKO po email / phone
+        // 🔎 1. Szukamy usera po email LUB phone
         const user = await prisma.user.findFirst({
           where: {
             OR: [
@@ -45,17 +59,21 @@ export const authOptions: AuthOptions = {
           },
         });
 
-        if (!user || !user.password) return null;
+        if (!user || !user.password) {
+          return null;
+        }
 
-        // ✅ 2. PORÓWNANIE HASHA
-        const isValid = await bcrypt.compare(
+        // 🔐 2. Porównanie hasła (bcryptjs)
+        const isValidPassword = await bcrypt.compare(
           credentials.password,
           user.password
         );
 
-        if (!isValid) return null;
+        if (!isValidPassword) {
+          return null;
+        }
 
-        // ✅ 3. Zwracamy usera do sesji
+        // ✅ 3. Zwracamy dane usera do JWT / sesji
         return {
           id: user.id,
           email: user.email,
@@ -77,15 +95,24 @@ export const authOptions: AuthOptions = {
 
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.user = user;
+      if (user) {
+        token.user = user as User;
+      }
       return token;
     },
+
     async session({ session, token }) {
-      if (token.user) session.user = token.user;
+      if (token.user) {
+        session.user = token.user as User;
+      }
       return session;
     },
   },
 };
+
+/* =========================
+   HANDLER
+========================= */
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
