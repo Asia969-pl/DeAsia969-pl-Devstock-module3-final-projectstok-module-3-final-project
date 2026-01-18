@@ -24,7 +24,6 @@ export default function CardPage() {
     selectedCartItems,
   } = context;
 
-  // 🔹 liczymy tylko zaznaczone produkty
   const totalQuantity = selectedCartItems.reduce((sum, item) => sum + item.quantity, 0);
   const total = selectedCartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 

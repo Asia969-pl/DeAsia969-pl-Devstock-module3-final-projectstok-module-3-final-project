@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from "react";
 import { useSnackbar } from "notistack";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import ShieldIcon from "@/components/ShieldIcon";
 import Header from "@/components/Header";
@@ -15,7 +15,6 @@ import Breadcrumb from "@/components/Breadcrumb";
 export default function ProductDetails() {
   const context = useContext(GlobalContext);
   const { enqueueSnackbar } = useSnackbar();
-  const router = useRouter();
   const { user } = useUser();
 
   if (!context) {

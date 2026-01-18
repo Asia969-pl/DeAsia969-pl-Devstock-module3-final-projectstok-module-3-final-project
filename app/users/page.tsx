@@ -77,7 +77,7 @@ export default function UsersPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        Ładowanie danych użytkownika...
+        Loading user data...
       </div>
     );
   }

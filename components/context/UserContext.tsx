@@ -31,7 +31,6 @@ export const useUser = (): UserContextType => {
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUserState] = useState<User | null>(null);
 
-  // 🔄 Load user from cookie on mount
   useEffect(() => {
     const cookieUser = Cookies.get("user");
     if (cookieUser) {

@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { message: "Nieprawidłowe id kategorii" },
+        { message: "Invalid category id" },
         { status: 400 }
       );
     }
@@ -20,16 +20,16 @@ export async function GET(request: Request) {
 
     if (!category) {
       return NextResponse.json(
-        { message: "Kategoria nie została znaleziona" },
+        { message: "Category not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json(category);
   } catch (error) {
-    console.error("Błąd podczas pobierania kategorii:", error);
+    console.error("Error while loading category:", error);
     return NextResponse.json(
-      { message: "Nie udało się pobrać kategorii" },
+      { message: "Failed to load category" },
       { status: 500 }
     );
   }
@@ -44,7 +44,7 @@ export async function PUT(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { message: "Nieprawidłowe id kategorii" },
+        { message: "Invalid category id" },
         { status: 400 }
       );
     }
@@ -66,9 +66,9 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedCategory);
   } catch (error) {
-    console.error("Błąd podczas aktualizacji kategorii:", error);
+    console.error("Error updating category:", error);
     return NextResponse.json(
-      { message: "Nie udało się zaktualizować kalegorii" },
+      { message: "Could not update the category" },
       { status: 500 }
     );
   }
@@ -83,12 +83,11 @@ export async function DELETE(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { message: "Nieprawidłowe id kategorii" },
+        { message: "Invalid category id" },
         { status: 400 }
       );
     }
 
-    // Sprawdzamy, czy kategoria ma przypisane produkty
     const categoryWithProducts = await prisma.category.findUnique({
       where: { id },
       include: { products: true },
@@ -96,31 +95,30 @@ export async function DELETE(request: Request) {
 
     if (!categoryWithProducts) {
       return NextResponse.json(
-        { message: "Kategoria nie istnieje" },
+        { message: "The category does not exist" },
         { status: 404 }
       );
     }
 
     if (categoryWithProducts.products.length > 0) {
       return NextResponse.json(
-        { message: "Nie można usunąć kategorii, która ma przypisane produkty" },
+        { message: "You cannot delete a category that has products assigned to it." },
         { status: 409 }
       );
     }
 
-    // Usuwamy kategorię
     const deletedCategory = await prisma.category.delete({
       where: { id },
     });
 
     return NextResponse.json({
-      message: "Kategoria została usunięta",
+      message: "The category has been deleted",
       category: deletedCategory,
     });
   } catch (error) {
-    console.error("Błąd podczas usuwania kategorii:", error);
+    console.error("Error deleting category:", error);
     return NextResponse.json(
-      { message: "Nie udało się usunąć kategorii" },
+      { message: "Failed to delete category" },
       { status: 500 }
     );
   }

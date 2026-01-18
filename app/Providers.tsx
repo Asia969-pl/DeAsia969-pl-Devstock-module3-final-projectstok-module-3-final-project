@@ -10,7 +10,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 interface ProvidersProps {
   children: ReactNode;
-  session?: any; // jeśli chcesz przekazać session z SSR/SSG
+  session?: any;
 }
 
 export default function Providers({ children, session }: ProvidersProps) {
@@ -21,42 +21,38 @@ export default function Providers({ children, session }: ProvidersProps) {
   };
 
   return (
-
     <UserProvider>
-    <GlobalContextProvider>
-   
-      
-          <SnackbarProvider
-            ref={notistackRef}
-            maxSnack={3}
-            autoHideDuration={3000}
-            preventDuplicate
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            ContentProps={{
-              sx: {
-                width: "100vw",
-                maxWidth: "100%",
-                boxSizing: "border-box",
-                borderRadius: "6px",
-                padding: "12px 24px",
-                margin: "8px 0",
-              },
-            }}
-            action={(key) => (
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={() => onClickDismiss(key)}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            )}
-          >
-            {children}
-          </SnackbarProvider>
-
-    </GlobalContextProvider>
+      <GlobalContextProvider>
+        <SnackbarProvider
+          ref={notistackRef}
+          maxSnack={3}
+          autoHideDuration={3000}
+          preventDuplicate
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          ContentProps={{
+            sx: {
+              width: "100vw",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              borderRadius: "6px",
+              padding: "12px 24px",
+              margin: "8px 0",
+            },
+          }}
+          action={(key) => (
+            <IconButton
+              size="small"
+              aria-label="close"
+              color="inherit"
+              onClick={() => onClickDismiss(key)}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          )}
+        >
+          {children}
+        </SnackbarProvider>
+      </GlobalContextProvider>
     </UserProvider>
   );
 }

@@ -12,9 +12,9 @@ export async function GET() {
 
     return NextResponse.json(orderItems);
   } catch (error) {
-    console.error("Błąd podczas pobierania orderItems:", error);
+    console.error("Error getting orderItems:", error);
     return NextResponse.json(
-      { message: "Nie udało się pobrać pozycji zamówień" },
+      { message: "Failed to download order items" },
       { status: 500 }
     );
   }
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     // 🔍 Walidacja
     if (!orderId || !productId || !quantity || !price) {
       return NextResponse.json(
-        { message: "Brakuje wymaganych pól" },
+        { message: "Required fields are missing" },
         { status: 400 }
       );
     }
@@ -44,9 +44,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newOrderItem, { status: 201 });
   } catch (error) {
-    console.error("Błąd podczas tworzenia orderItem:", error);
+    console.error("Error creating orderItem:", error);
     return NextResponse.json(
-      { message: "Nie udało się utworzyć pozycji zamówienia" },
+      { message: "Failed to create order item" },
       { status: 500 }
     );
   }

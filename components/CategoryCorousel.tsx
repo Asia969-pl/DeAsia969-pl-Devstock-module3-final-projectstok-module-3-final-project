@@ -78,7 +78,6 @@ export default function CategoryCarousel({
             }`}
           >
             <div className="mx-auto h-full md:px-[120px] px-14 grid md:grid-cols-2 items-center justify-between gap-12">
-              {/* TEXT */}
               <div className="flex flex-col gap-10 max-w-[433px]">
                 <h1 className="text-[32px] font-medium text-black dark:text-[#FCFCFC]">
                   {category.name}

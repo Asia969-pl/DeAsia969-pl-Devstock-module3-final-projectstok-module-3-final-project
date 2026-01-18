@@ -6,9 +6,9 @@ export async function GET() {
     const brands = await prisma.brand.findMany();
     return NextResponse.json(brands);
   } catch (error) {
-    console.error("Błąd podczas pobierania marek:", error);
+    console.error("Error while downloading brands:", error);
     return NextResponse.json(
-      { message: "Nie udało się pobrać marek" },
+      { message: "Unable to download brands" },
       { status: 500 }
     );
   }
@@ -16,14 +16,12 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    // Pobranie danych z ciała żądania
     const body = await request.json();
     const { name, image } = body;
 
-    // Walidacja podstawowa
     if (!name || !image) {
       return NextResponse.json(
-        { message: "Brakuje wymaganych pól" },
+        { message: "Required fields are missing" },
         { status: 400 }
       );
     }
@@ -36,9 +34,9 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(newBrand, { status: 201 });
   } catch (error) {
-    console.error("Błąd podczas tworzenia marki:", error);
+    console.error("Error while creating brand:", error);
     return NextResponse.json(
-      { message: "Nie udało się utworzyć marki" },
+      { message: "Failed to create brand" },
       { status: 500 }
     );
   }

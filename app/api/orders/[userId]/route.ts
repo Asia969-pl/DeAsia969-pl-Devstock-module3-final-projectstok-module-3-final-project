@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/library/prisma";
 
-/* =========================
-   HELPERS
-========================= */
 function getUserIdFromUrl(req: NextRequest): number | null {
   try {
     const url = new URL(req.url);
@@ -16,9 +13,6 @@ function getUserIdFromUrl(req: NextRequest): number | null {
   }
 }
 
-/* =========================
-   GET /api/orders/[userId]
-========================= */
 export async function GET(req: NextRequest) {
   try {
     const userId = getUserIdFromUrl(req);
@@ -51,9 +45,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/* =========================
-   POST /api/orders/[userId]
-========================= */
 export async function POST(req: NextRequest) {
   try {
     const userId = getUserIdFromUrl(req);
@@ -74,8 +65,6 @@ export async function POST(req: NextRequest) {
       serviceFee,
       insuranceFee,
     } = body;
-
-    /* ===== VALIDATION ===== */
 
     if (!addressId || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -98,8 +87,6 @@ export async function POST(req: NextRequest) {
         );
       }
     }
-
-    /* ===== CALCULATIONS ===== */
 
     const productTotal = items.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -135,16 +122,14 @@ export async function POST(req: NextRequest) {
       shipping +
       service;
 
-    /* ===== CREATE ORDER ===== */
 
     const newOrder = await prisma.order.create({
       data: {
         userId,
         addressId,
-
         productTotal,
         protectionTotal,
-        insuranceFee: insurance, // ✅ zapis do DB
+        insuranceFee: insurance, 
         shippingCost: shipping,
         serviceFee: service,
         totalAmount,

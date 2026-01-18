@@ -27,7 +27,7 @@ export default function CheckoutPage() {
     selectedAddressId,
     setSelectedAddressId,
     handlePayNow,
-    shippingInsurance
+    shippingInsurance,
   } = ctx;
 
   const insuranceFee = 5;
@@ -52,7 +52,12 @@ export default function CheckoutPage() {
     0
   );
 
-  const total = productsTotal + protectionTotal + shippingCost + serviceFee + shippingInsurance;
+  const total =
+    productsTotal +
+    protectionTotal +
+    shippingCost +
+    serviceFee +
+    shippingInsurance;
 
   const handleAddAddress = async (data: any) => {
     try {
@@ -101,7 +106,6 @@ export default function CheckoutPage() {
 
       <div className="w-full max-w-[1820px] mx-auto px-4 sm:px-6 lg:px-10 py-10">
         <div className="flex flex-col lg:flex-row gap-10">
-          {/* LEFT COLUMN */}
           <div className="flex-1 space-y-10">
             <div>
               <h1 className="text-[24px] font-medium mb-6">Your Order</h1>
@@ -122,7 +126,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* ADDRESS */}
+           
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Address</h2>
               <div className="bg-white border border-gray-200 dark:bg-[#262626] dark:border-[#383B42] rounded-xl p-6">
@@ -134,7 +138,6 @@ export default function CheckoutPage() {
                 />
               </div>
             </div>
-            {/* SHIPPING */}
             <h2 className="text-[24px] font-medium">Shipping Method</h2>
             <div className="flex gap-4 bg-white border border-gray-200 dark:bg-[#262626] dark:border-[#383B42] rounded-[6px] p-6 ">
               <ShieldIcon />
@@ -144,24 +147,21 @@ export default function CheckoutPage() {
             {/* PAYMENT */}
             <h2 className="text-[24px] font-medium">Payment Method</h2>
 
-              <div className="flex gap-4 items-center bg-white border border-gray-200 dark:bg-[#262626] dark:border-[#383B42] rounded-[6px] p-6 ">
-                <div className="bg-white rounded-[6px] p-1">
-                  <Image
-                    src="https://i.ibb.co/DDcgLkFh/Pay.png"
-                    alt="Apple Pay"
-                    width={40}
-                    height={34}
-                    className="h-8 w-auto object-contain"
-                  />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">Apple Pay</p>
-                </div>
+            <div className="flex gap-4 items-center bg-white border border-gray-200 dark:bg-[#262626] dark:border-[#383B42] rounded-[6px] p-6 ">
+              <div className="bg-white rounded-[6px] p-1">
+                <Image
+                  src="https://i.ibb.co/DDcgLkFh/Pay.png"
+                  alt="Apple Pay"
+                  width={40}
+                  height={34}
+                  className="h-8 w-auto object-contain"
+                />
               </div>
-           
+              <div className="flex-1">
+                <p className="font-medium">Apple Pay</p>
+              </div>
+            </div>
           </div>
-
-          {/* RIGHT COLUMN */}
           <div className="w-full lg:w-[423px] h-fit bg-white border border-gray-200 dark:bg-[#262626] dark:border-[#383B42] rounded-[6px] p-6 text-black dark:text-[#FCFCFC]">
             <h2 className="text-[18px] font-medium">Total Product</h2>
 
@@ -182,8 +182,9 @@ export default function CheckoutPage() {
 
             <div className="flex justify-between mt-4 text-[16px] font-medium text-black dark:text-[#E7E7E7]">
               <span className="mb-4"> Shipping insurance</span>
-              <span className="text-[18px]">${shippingInsurance.toFixed(2)}</span>
-
+              <span className="text-[18px]">
+                ${shippingInsurance.toFixed(2)}
+              </span>
             </div>
             <div className="h-[1px] w-full bg-black dark:bg-[#383B42]"></div>
             <div className="mt-4">
@@ -202,11 +203,10 @@ export default function CheckoutPage() {
             </div>
 
             <button
-  type="button"
+              type="button"
               onClick={() => {
-    console.log("🟢 PAY NOW CLICKED");
-    handlePayNow();
-  }}
+                handlePayNow();
+              }}
               disabled={!selectedAddressId}
               className="w-full mt-4 py-[14px] rounded-[6px] bg-[#F29145] hover:bg-orange-600 text-black font-medium"
             >

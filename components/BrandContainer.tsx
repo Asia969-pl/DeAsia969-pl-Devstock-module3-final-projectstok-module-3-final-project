@@ -26,17 +26,14 @@ export default function BrandContainer({ brands }) {
 
   const maxCardWidth = 220;
   const gap = 32;
-
-  // BEZPIECZNA TABLICA
   const safeBrands = brands || [];
-
   const totalWidth = safeBrands.length * (maxCardWidth + gap) - gap;
   const maxTranslateX = Math.max(totalWidth - containerWidth, 0);
   const isAtEnd = translateX >= maxTranslateX;
 
   const handleScroll = () => {
     if (!isAtEnd) {
-      const visibleCards = Math.floor(containerWidth / (maxCardWidth + gap)) || 1; 
+      const visibleCards = Math.floor(containerWidth / (maxCardWidth + gap)) || 1;
       const moveBy = visibleCards * (maxCardWidth + gap);
       setTranslateX((prev) => Math.min(prev + moveBy, maxTranslateX));
     } else {
@@ -47,8 +44,8 @@ export default function BrandContainer({ brands }) {
   const handleBrandClick = (brandName: string) => {
     setFilters(prev => ({
       ...prev,
-      categories: [],       // reset kategorii (opcjonalnie)
-      brands: [brandName],  // 👈 ustaw brand
+      categories: [],       
+      brands: [brandName],  
     }));
 
     router.push("/product");
@@ -76,7 +73,7 @@ export default function BrandContainer({ brands }) {
 
 
 
-  
+
   return (
     <div className="w-full px-4 md:px-10">
       {/* Nagłówek */}

@@ -2,10 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/library/prisma";
 import bcrypt from "bcryptjs"; // ✅ ZMIANA
 
-/* =========================
-   POST — REGISTER USER
-========================= */
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -18,7 +14,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔍 sprawdzenie czy user już istnieje
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -37,7 +32,7 @@ export async function POST(req: Request) {
       data: {
         name,
         email,
-        password: hashedPassword, // ✅ zapisujemy HASH
+        password: hashedPassword, 
         phone,
         country,
         picture: "https://i.ibb.co/PvWrtkmt/avatar.png",
@@ -61,10 +56,6 @@ export async function POST(req: Request) {
     );
   }
 }
-
-/* =========================
-   GET — LIST USERS
-========================= */
 
 export async function GET() {
   try {

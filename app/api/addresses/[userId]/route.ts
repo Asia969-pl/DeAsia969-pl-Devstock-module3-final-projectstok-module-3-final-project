@@ -8,9 +8,6 @@ function getUserIdFromUrl(req: NextRequest): number | null {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
-/* =========================
-   GET /api/addresses/[userId]
-========================= */
 export async function GET(req: NextRequest) {
   try {
     const userId = getUserIdFromUrl(req);
@@ -27,7 +24,7 @@ export async function GET(req: NextRequest) {
 
     const addresses = await prisma.address.findMany({
       where,
-      orderBy: { id: "desc" }, // najnowsze na górze
+      orderBy: { id: "desc" }, 
     });
 
     return NextResponse.json(addresses, { status: 200 });
@@ -40,9 +37,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/* =========================
-   POST /api/addresses/[userId]
-========================= */
+
 export async function POST(req: NextRequest) {
   try {
     const userId = getUserIdFromUrl(req);
@@ -67,7 +62,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 🟢 jeśli nowy adres ma być główny — zdejmujemy flagę z poprzednich
     if (isDefault === true) {
       await prisma.address.updateMany({
         where: { userId, isDefault: true },

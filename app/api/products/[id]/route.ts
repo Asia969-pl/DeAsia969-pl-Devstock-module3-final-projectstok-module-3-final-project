@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/library/prisma";
 
-/* =========================
-   GET – pobierz produkt + kategoria + marka
-========================= */
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
@@ -12,7 +9,7 @@ export async function GET(request: Request) {
 
     if (!idParam || Number.isNaN(id)) {
       return NextResponse.json(
-        { message: "Nieprawidłowe id produktu" },
+        { message: "Invalid product id" },
         { status: 400 }
       );
     }
@@ -27,24 +24,21 @@ export async function GET(request: Request) {
 
     if (!product) {
       return NextResponse.json(
-        { message: "Produkt nie został znaleziony" },
+        { message: "Product not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json(product);
   } catch (error) {
-    console.error("Błąd podczas pobierania produktu:", error);
+    console.error("Error while downloading product:", error);
     return NextResponse.json(
-      { message: "Nie udało się pobrać produktu" },
+      { message: "Failed to download product" },
       { status: 500 }
     );
   }
 }
 
-/* =========================
-   PUT – aktualizacja produktu
-========================= */
 export async function PUT(request: Request) {
   try {
     const url = new URL(request.url);
@@ -53,7 +47,7 @@ export async function PUT(request: Request) {
 
     if (!idParam || Number.isNaN(id)) {
       return NextResponse.json(
-        { message: "Nieprawidłowe id produktu" },
+        { message: "Invalid product id" },
         { status: 400 }
       );
     }
@@ -93,17 +87,14 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedProduct);
   } catch (error) {
-    console.error("Błąd podczas aktualizacji produktu:", error);
+    console.error("Error while updating product:", error);
     return NextResponse.json(
-      { message: "Nie udało się zaktualizować produktu" },
+      { message: "Failed to update product" },
       { status: 500 }
     );
   }
 }
 
-/* =========================
-   DELETE – usuń produkt
-========================= */
 export async function DELETE(request: Request) {
   try {
     const url = new URL(request.url);
@@ -112,7 +103,7 @@ export async function DELETE(request: Request) {
 
     if (!idParam || Number.isNaN(id)) {
       return NextResponse.json(
-        { message: "Nieprawidłowe id produktu" },
+        { message: "Invalid product id" },
         { status: 400 }
       );
     }
@@ -122,13 +113,13 @@ export async function DELETE(request: Request) {
     });
 
     return NextResponse.json({
-      message: "Produkt został usunięty",
+      message: "The product has been removed",
       product: deletedProduct,
     });
   } catch (error) {
-    console.error("Błąd podczas usuwania produktu:", error);
+    console.error("Error removing product:", error);
     return NextResponse.json(
-      { message: "Nie udało się usunąć produktu" },
+      { message: "Failed to remove product" },
       { status: 500 }
     );
   }

@@ -3,9 +3,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/library/prisma";
 import bcrypt from "bcryptjs";
 
-/* =========================
-   TYPES
-========================= */
 
 interface User {
   id: number;
@@ -15,9 +12,6 @@ interface User {
   picture?: string | null;
 }
 
-/* =========================
-   NEXTAUTH TYPE AUGMENTATION
-========================= */
 
 declare module "next-auth" {
   interface Session {
@@ -30,10 +24,6 @@ declare module "next-auth/jwt" {
     user?: User;
   }
 }
-
-/* =========================
-   AUTH OPTIONS
-========================= */
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -49,7 +39,6 @@ export const authOptions: AuthOptions = {
           return null;
         }
 
-        // 🔎 1. Szukamy usera po email LUB phone
         const user = await prisma.user.findFirst({
           where: {
             OR: [
@@ -63,7 +52,6 @@ export const authOptions: AuthOptions = {
           return null;
         }
 
-        // 🔐 2. Porównanie hasła (bcryptjs)
         const isValidPassword = await bcrypt.compare(
           credentials.password,
           user.password
@@ -73,7 +61,6 @@ export const authOptions: AuthOptions = {
           return null;
         }
 
-        // ✅ 3. Zwracamy dane usera do JWT / sesji
         return {
           id: user.id,
           email: user.email,
@@ -110,9 +97,6 @@ export const authOptions: AuthOptions = {
   },
 };
 
-/* =========================
-   HANDLER
-========================= */
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

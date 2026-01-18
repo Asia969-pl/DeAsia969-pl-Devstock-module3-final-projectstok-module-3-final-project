@@ -4,17 +4,15 @@ import { prisma } from "@/library/prisma";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-
     const limitParam = searchParams.get("limit");
     const pageParam = searchParams.get("page");
 
-    // 🔹 JEŚLI NIE MA LIMITU → ZWRÓĆ WSZYSTKO
     if (!limitParam) {
       const products = await prisma.product.findMany({
         orderBy: { id: "asc" },
         include: {
-          category: true, // dołączamy kategorię
-          brand: true,    // dołączamy markę
+          category: true, 
+          brand: true,    
         },
       });
 
@@ -27,7 +25,7 @@ export async function GET(request: Request) {
       });
     }
 
-    // 🔹 JEŚLI JEST LIMIT → PAGINACJA
+  
     const limit = Math.max(Number(limitParam), 1);
     const page = Math.max(Number(pageParam) || 1, 1);
     const skip = (page - 1) * limit;
@@ -38,8 +36,8 @@ export async function GET(request: Request) {
         take: limit,
         orderBy: { id: "asc" },
         include: {
-          category: true, // dołączamy kategorię
-          brand: true,    // dołączamy markę
+          category: true, 
+          brand: true,    
         },
       }),
       prisma.product.count(),
@@ -58,9 +56,9 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Błąd podczas pobierania produktów:", error);
+    console.error("Error while downloading products:", error);
     return NextResponse.json(
-      { message: "Nie udało się pobrać produktów" },
+      { message: "Failed to download products" },
       { status: 500 }
     );
   }
@@ -72,7 +70,7 @@ export async function POST(request: Request) {
     const { name, description, price, stock, imageUrl, categoryId, brandId } = body;
 
     if (!name || !description || !price || !stock || !imageUrl || !categoryId || !brandId) {
-      return NextResponse.json({ message: "Brakuje wymaganych pól" }, { status: 400 });
+      return NextResponse.json({ message: "Required fields are missing" }, { status: 400 });
     }
 
     const newProduct = await prisma.product.create({
@@ -86,14 +84,14 @@ export async function POST(request: Request) {
         brandId,
       },
       include: {
-        category: true, // od razu zwracamy też kategorię
-        brand: true,    // i markę
+        category: true, 
+        brand: true,    
       },
     });
 
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {
-    console.error("Błąd podczas tworzenia produktu:", error);
-    return NextResponse.json({ message: "Nie udało się utworzyć produktu" }, { status: 500 });
+    console.error("Error creating product:", error);
+    return NextResponse.json({ message: "Failed to create product" }, { status: 500 });
   }
 }

@@ -21,7 +21,6 @@ export default function CheckoutCard({
 }: CheckoutCardProps) {
   return (
     <div className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-[#383B42] rounded-lg overflow-hidden ">
-      {/* PRODUCT ROW */}
       <div className="">
         <BasketCard
           product={product}
@@ -30,7 +29,6 @@ export default function CheckoutCard({
           onClick={onRemove}
         />
       </div>
-      {/* PROTECTION ROW */}
       <div className="flex items-center justify-between p-6">
         <label className="flex items-start gap-4 ">
           <input

@@ -3,10 +3,8 @@
 import { ReactNode, createContext, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-/* ================= TYPES ================= */
-
 export interface CartItem {
-  cardItemId: number; // ID z API koszyka
+  cardItemId: number; 
   product: {
     id: number;
     name: string;
@@ -34,7 +32,6 @@ interface Address {
 }
 
 interface GlobalContextType {
-  // --- GLOBAL DATA ---
   categories: any[];
   setCategories: React.Dispatch<React.SetStateAction<any[]>>;
   products: any[];
@@ -64,24 +61,21 @@ interface GlobalContextType {
   clearCart: () => void;
   updateQuantity: (cardItemId: number, quantity: number) => void;
 
-  // --- SELECTED CART ITEMS ---
   selectedCartIds: number[];
   toggleSelectCartItem: (cardItemId: number) => void;
   selectedCartItems: CartItem[];
 
-  // --- ADDRESSES ---
   addresses: Address[];
   setAddresses: React.Dispatch<React.SetStateAction<Address[]>>;
   selectedAddressId: number | null;
   setSelectedAddressId: (id: number) => void;
 
-  // --- EXTRA COSTS ---
   protectionFeeIds: number[];
   toggleProtectionFee: (cardItemId: number) => void;
   shippingCost: number;
   serviceFee: number;
   shippingInsurance: number
-  // --- ORDER ---
+
   handlePayNow: () => Promise<void>;
 }
 
@@ -89,11 +83,9 @@ interface ProviderProps {
   children: ReactNode;
 }
 
-/* ================= CONTEXT ================= */
 
 export const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 
-/* ================= PROVIDER ================= */
 
 export const GlobalContextProvider = ({ children }: ProviderProps) => {
   const router = useRouter();
@@ -108,12 +100,11 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
   const [productById, setProductById] = useState<any | null>(null);
   const [filters, setFilters] = useState<Filters>({ categories: [],   brands: [],  price: { min: "", max: "" } });
 
-  /* ---------- CART ---------- */
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCartIds, setSelectedCartIds] = useState<number[]>([]);
   const [protectionFeeIds, setProtectionFeeIds] = useState<number[]>([]);
 
-  /* ---------- ADDRESSES ---------- */
+ 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
 
@@ -122,7 +113,6 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
   const shippingInsurance = 6
 
 
-  /* ================= HELPERS ================= */
 
   const getUserIdFromCookies = (): number | null => {
     try {
@@ -138,7 +128,7 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
 
   const userId = getUserIdFromCookies();
 
-  /* ================= FETCH BASE DATA ================= */
+
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -160,7 +150,6 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
     fetchAll();
   }, []);
 
-  /* ================= FETCH PRODUCTS ================= */
 
   const fetchProductsByCategory = useCallback(async (
     limit?: number,
@@ -202,7 +191,7 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
     }
   }, []);
 
-  /* ================= CART OPERATIONS ================= */
+
 
   const fetchCart = useCallback(async () => {
     if (!userId) return;
@@ -262,7 +251,7 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
     setProtectionFeeIds([]);
   };
 
-  /* ================= SELECTED ITEMS ================= */
+
 
   const toggleSelectCartItem = (cardItemId: number) => {
     setSelectedCartIds(prev => prev.includes(cardItemId) ? prev.filter(id => id !== cardItemId) : [...prev, cardItemId]);
@@ -274,7 +263,7 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
 
   const selectedCartItems = cart.filter(i => selectedCartIds.includes(i.cardItemId));
 
-  /* ================= ADDRESSES ================= */
+
 
   useEffect(() => {
     if (!userId) return;
@@ -288,29 +277,23 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
     fetchAddresses();
   }, [userId]);
 
-  /* ================= ORDER ================= */
+
 
   const handlePayNow = async () => {
     try {
-      console.log("🔥 handlePayNow CLICKED");
-      // 1️⃣ Walidacja
       if (!userId) {
-        console.warn("Brak userId (użytkownik niezalogowany)");
-        alert("Nie zalogowano użytkownika");
+        console.warn("No userId (user not logged in)");
         return;
       }
       if (!selectedAddressId) {
-        console.warn("Nie wybrano adresu dostawy");
-        alert("Wybierz adres dostawy");
+        console.warn("No delivery address selected");
         return;
       }
       if (selectedCartItems.length === 0) {
-        console.warn("Koszyk pusty");
-        alert("Brak produktów do zamówienia");
+        console.warn("empty basket");
         return;
       }
   
-      // 2️⃣ Przygotowanie danych zamówienia
       const items = selectedCartItems.map(item => ({
         productId: item.product.id,
         quantity: item.quantity,
@@ -326,9 +309,7 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
         insuranceFee: shippingInsurance
       };
   
-      console.log("Tworzę zamówienie z danymi:", { userId, body });
-  
-      // 3️⃣ Wysłanie zamówienia do API
+    
       const res = await fetch(`/api/orders/${userId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -337,17 +318,11 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
   
       const data = await res.json();
   
-      // 4️⃣ Obsługa odpowiedzi
       if (!res.ok) {
-        console.error("Błąd API:", data);
-        alert(data.message || "Błąd tworzenia zamówienia");
+        console.error("API Error:", data);
         return;
       }
   
-      console.log("Zamówienie utworzone:", data);
-      console.log("Redirecting to orderSuccess:", `/ordersuccess/${data.id}`);
-  
-      // 5️⃣ Usunięcie produktów z koszyka w API
       await Promise.all(
         cart.map(item =>
           fetch(`/api/card/${userId}`, {
@@ -358,12 +333,9 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
         )
       );
   
-      console.log("Koszyk wyczyszczony");
-  
-      // 6️⃣ Wyczyszczenie lokalnego stanu koszyka
+
       clearCart();
-  
-      // 7️⃣ Przekierowanie na stronę sukcesu
+
      router.push(`/ordersuccess/${data.id}`);
     } catch (err: any) {
       console.error("Błąd w handlePayNow:", err);
@@ -371,8 +343,6 @@ export const GlobalContextProvider = ({ children }: ProviderProps) => {
     }
   };
   
-  /* ================= PROVIDER ================= */
-
   return (
     <GlobalContext.Provider value={{
       categories, setCategories,

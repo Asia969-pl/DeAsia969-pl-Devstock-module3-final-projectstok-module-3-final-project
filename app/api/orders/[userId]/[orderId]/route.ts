@@ -4,9 +4,9 @@ import { prisma } from "@/library/prisma";
 function parseIdsFromUrl(req: NextRequest): { userId: number | null; orderId: number | null } {
   try {
     const url = new URL(req.url);
-    const segments = url.pathname.split("/").filter(Boolean); // ["api", "orders", "123", "456"]
-    const orderIdStr = segments.pop(); // ostatni segment = orderId
-    const userIdStr = segments.pop(); // przedostatni segment = userId
+    const segments = url.pathname.split("/").filter(Boolean); 
+    const orderIdStr = segments.pop(); 
+    const userIdStr = segments.pop(); 
     const userId = Number(userIdStr);
     const orderId = Number(orderIdStr);
     return {
@@ -18,7 +18,7 @@ function parseIdsFromUrl(req: NextRequest): { userId: number | null; orderId: nu
   }
 }
 
-// GET /api/orders/[userId]/[orderId]
+
 export async function GET(req: NextRequest) {
   try {
     const { userId, orderId } = parseIdsFromUrl(req);
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
           include: {
             product: {
               include: {
-                category: true, // <-- dodano, aby mieć category.name
+                category: true, 
               },
             },
           },
@@ -50,7 +50,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
     }
 
-    // Możesz opcjonalnie zwrócić tylko categoryName, np. mapując items
     const orderWithCategory = {
       ...order,
       items: order.items.map((item) => ({

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/library/prisma";
 import bcrypt from "bcryptjs";
 
-// GET /api/users/[id]
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
@@ -11,7 +10,7 @@ export async function GET(req: NextRequest) {
 
     if (!id || isNaN(id)) {
       return NextResponse.json(
-        { message: "Nieprawidłowe id użytkownika" },
+        { message: "Invalid user id" },
         { status: 400 }
       );
     }
@@ -37,7 +36,7 @@ export async function GET(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { message: "Nie znaleziono użytkownika" },
+        { message: "User not found" },
         { status: 404 }
       );
     }
@@ -50,7 +49,7 @@ export async function GET(req: NextRequest) {
   } catch (error: any) {
     console.error("GET /api/users/[id] error:", error);
     return NextResponse.json(
-      { message: "Nie udało się pobrać użytkownika", error: error.message },
+      { message: "Failed to fetch user", error: error.message },
       { status: 500 }
     );
   }

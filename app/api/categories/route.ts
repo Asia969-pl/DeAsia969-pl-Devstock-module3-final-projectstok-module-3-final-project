@@ -6,9 +6,9 @@ export async function GET() {
     const categories = await prisma.category.findMany();
     return NextResponse.json(categories);
   } catch (error) {
-    console.error("Błąd podczas pobierania kategorii:", error);
+    console.error("Error while loading category:", error);
     return NextResponse.json(
-      { message: "Nie udało się pobrać kategorii" },
+      { message: "Failed to load category" },
       { status: 500 }
     );
   }
@@ -16,14 +16,24 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    // Pobranie danych z ciała żądania
     const body = await request.json();
-    const { name, categoryImage, categoryDescription,  categoryCarouselImage, categoryInfo} = body;
+    const {
+      name,
+      categoryImage,
+      categoryDescription,
+      categoryCarouselImage,
+      categoryInfo,
+    } = body;
 
-    // Walidacja podstawowa
-    if (!name || !categoryImage || !categoryDescription ||!categoryCarouselImage ||!categoryInfo  ) {
+    if (
+      !name ||
+      !categoryImage ||
+      !categoryDescription ||
+      !categoryCarouselImage ||
+      !categoryInfo
+    ) {
       return NextResponse.json(
-        { message: "Brakuje wymaganych pól" },
+        { message: "Required fields are missing" },
         { status: 400 }
       );
     }
@@ -34,14 +44,14 @@ export async function POST(request: Request) {
         categoryImage,
         categoryDescription,
         categoryCarouselImage,
-        categoryInfo
+        categoryInfo,
       },
     });
     return NextResponse.json(newCategory, { status: 201 });
   } catch (error) {
-    console.error("Błąd podczas tworzenia kategorii:", error);
+    console.error("Error creating category:", error);
     return NextResponse.json(
-      { message: "Nie udało się utworzyć kategorii" },
+      { message: "Failed to create category" },
       { status: 500 }
     );
   }
